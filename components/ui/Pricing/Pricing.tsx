@@ -1,7 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from '@supabase/supabase-js';
+
+// Supabase istemcisini doğrudan mevcut ortam değişkenlerinden oluşturuyoruz
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 interface Props {
   user: any;
@@ -10,7 +15,6 @@ interface Props {
 }
 
 export default function Pricing({ user }: Props) {
-  const supabase = createClientComponentClient();
   const adminWallet = process.env.NEXT_PUBLIC_ADMIN_WALLET_ADDRESS || '0x0000000000000000000000000000000000000000';
   
   const [copied, setCopied] = useState(false);
@@ -57,7 +61,7 @@ export default function Pricing({ user }: Props) {
         setSubmitted(true);
       }
     } catch (err: any) {
-      setErrorMessage('Bir kriz/bağlantı hatası oluştu.');
+      setErrorMessage('Bir bağlantı hatası oluştu.');
     } finally {
       setLoading(false);
     }
