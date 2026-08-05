@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 interface Props {
   user: any;
@@ -9,10 +10,14 @@ interface Props {
 }
 
 export default function Pricing({ user }: Props) {
+  const supabase = createClientComponentClient();
   const adminWallet = process.env.NEXT_PUBLIC_ADMIN_WALLET_ADDRESS || '0x0000000000000000000000000000000000000000';
+  
   const [copied, setCopied] = useState(false);
   const [txHash, setTxHash] = useState('');
+  const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleCopy = () => {
     navigator.clipboard.writeText(adminWallet);
@@ -20,10 +25,42 @@ export default function Pricing({ user }: Props) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleSubmitTx = (e: React.FormEvent) => {
+  const handleSubmitTx = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!txHash) return;
-    setSubmitted(true);
+    
+    setLoading(true);
+    setErrorMessage('');
+
+    if (!user) {
+      setErrorMessage('Ödeme bildirimi yapmak için lütfen önce giriş yapın.');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const { error } = await supabase.from('payments').insert([
+        {
+          user_id: user.id,
+          tx_hash: txHash.trim(),
+          status: 'pending'
+        }
+      ]);
+
+      if (error) {
+        if (error.code === '23505') {
+          setErrorMessage('Bu İşlem Kodu (TxHash) daha önce bildirilmiş.');
+        } else {
+          setErrorMessage('Kayıt oluşturulurken bir hata oluştu: ' + error.message);
+        }
+      } else {
+        setSubmitted(true);
+      }
+    } catch (err: any) {
+      setErrorMessage('Bir kriz/bağlantı hatası oluştu.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(adminWallet)}`;
@@ -72,12 +109,12 @@ export default function Pricing({ user }: Props) {
           <div>
             <h3 className="text-lg font-semibold mb-2">Ödeme Bildirimi</h3>
             <p className="text-xs text-zinc-400 mb-4">
-              Transferi yaptıktan sonra İşlem Kodunu (TxHash) aşağıya girerek aboneliğinizi anında aktif edebilirsiniz.
+              Transferi yaptıktan sonra İşlem Kodunu (TxHash) aşağıya girerek aboneliğinizi aktif edebilirsiniz.
             </p>
 
             {submitted ? (
               <div className="p-4 bg-emerald-950/50 border border-emerald-500/30 text-emerald-400 rounded-lg text-sm">
-                ✓ İşlem kodunuz alındı. Doğrulama yapıldıktan sonra erişiminiz tanımlanacaktır.
+                ✓ İşlem kodunuz Supabase veritabanına iletildi. Doğrulama yapıldıktan sonra erişiminiz tanımlanacaktır.
               </div>
             ) : (
               <form onSubmit={handleSubmitTx} className="space-y-3">
@@ -91,11 +128,17 @@ export default function Pricing({ user }: Props) {
                     required
                   />
                 </div>
+
+                {errorMessage && (
+                  <p className="text-xs text-red-500 font-medium">{errorMessage}</p>
+                )}
+
                 <button
                   type="submit"
-                  className="w-full bg-emerald-600 hover:bg-emerald-500 font-bold py-3 px-4 rounded-lg text-sm transition"
+                  disabled={loading}
+                  className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 font-bold py-3 px-4 rounded-lg text-sm transition"
                 >
-                  Ödemeyi Onayla
+                  {loading ? 'İşleniyor...' : 'Ödemeyi Onayla'}
                 </button>
               </form>
             )}
