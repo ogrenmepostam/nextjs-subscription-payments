@@ -1,171 +1,208 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
-// Supabase istemcisini doğrudan mevcut ortam değişkenlerinden oluşturuyoruz
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-interface Props {
-  user: any;
-  products: any[];
-  subscription: any;
-}
+export default function AdminAgencyDashboard() {
+  const [companies, setCompanies] = useState<any[]>([]);
+  const [creators, setCreators] = useState<any[]>([]);
+  const [matches, setMatches] = useState<any[]>([]);
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-export default function Pricing({ user }: Props) {
-  const adminWallet = process.env.NEXT_PUBLIC_ADMIN_WALLET_ADDRESS || '0x0000000000000000000000000000000000000000';
-  
-  const [copied, setCopied] = useState(false);
-  const [txHash, setTxHash] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  // Yeni Şirket Formu
+  const [companyName, setCompanyName] = useState('');
+  const [companyWallet, setCompanyWallet] = useState('');
+  const [companyComm, setCompanyComm] = useState('');
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(adminWallet);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
+  // Yeni Üretici Formu
+  const [creatorName, setCreatorName] = useState('');
+  const [creatorWallet, setCreatorWallet] = useState('');
+  const [creatorComm, setCreatorComm] = useState('');
 
-  const handleSubmitTx = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!txHash) return;
-    
+  // Eşleştirme Formu
+  const [selectedCompany, setSelectedCompany] = useState('');
+  const [selectedCreator, setSelectedCreator] = useState('');
+  const [refCode, setRefCode] = useState('');
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
     setLoading(true);
-    setErrorMessage('');
+    const { data: compData } = await supabase.from('companies').select('*');
+    const { data: creatData } = await supabase.from('creators').select('*');
+    const { data: matchData } = await supabase.from('matches').select('*, companies(*), creators(*)');
+    const { data: txData } = await supabase.from('transactions').select('*, matches(*, companies(*), creators(*))');
 
-    if (!user) {
-      setErrorMessage('Ödeme bildirimi yapmak için lütfen önce giriş yapın.');
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const { error } = await supabase.from('payments').insert([
-        {
-          user_id: user.id,
-          tx_hash: txHash.trim(),
-          status: 'pending'
-        }
-      ]);
-
-      if (error) {
-        if (error.code === '23505') {
-          setErrorMessage('Bu İşlem Kodu (TxHash) daha önce bildirilmiş.');
-        } else {
-          setErrorMessage('Kayıt oluşturulurken bir hata oluştu: ' + error.message);
-        }
-      } else {
-        setSubmitted(true);
-      }
-    } catch (err: any) {
-      setErrorMessage('Bir bağlantı hatası oluştu.');
-    } finally {
-      setLoading(false);
-    }
+    if (compData) setCompanies(compData);
+    if (creatData) setCreators(creatData);
+    if (matchData) setMatches(matchData);
+    if (txData) setTransactions(txData);
+    setLoading(false);
   };
 
-  const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(adminWallet)}`;
+  const handleAddCompany = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await supabase.from('companies').insert([
+      { name: companyName, wallet_address: companyWallet, commission_per_sale: Number(companyComm) }
+    ]);
+    setCompanyName(''); setCompanyWallet(''); setCompanyComm('');
+    fetchData();
+  };
+
+  const handleAddCreator = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await supabase.from('creators').insert([
+      { name: creatorName, wallet_address: creatorWallet, commission_per_sale: Number(creatorComm) }
+    ]);
+    setCreatorName(''); setCreatorWallet(''); setCreatorComm('');
+    fetchData();
+  };
+
+  const handleCreateMatch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedCompany || !selectedCreator || !refCode) return;
+    await supabase.from('matches').insert([
+      { company_id: selectedCompany, creator_id: selectedCreator, ref_code: refCode.trim() }
+    ]);
+    setRefCode('');
+    fetchData();
+  };
+
+  const handleStatusChange = async (txId: string, newStatus: string) => {
+    await supabase.from('transactions').update({ status: newStatus }).eq('id', txId);
+    fetchData();
+  };
 
   return (
-    <section className="bg-black text-white py-12 px-4 max-w-4xl mx-auto">
-      <div className="text-center mb-10">
-        <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl mb-4">
-          USDT ile Abonelik & Katılım
-        </h1>
-        <p className="text-zinc-400 text-lg">
-          Ödemenizi doğrudan Web3 cüzdanınızdan USDT (BEP20 / TRC20) olarak gerçekleştirebilirsiniz.
-        </p>
-      </div>
+    <div className="min-h-screen bg-zinc-950 text-white p-6 max-w-7xl mx-auto space-y-10">
+      <header className="border-b border-zinc-800 pb-4">
+        <h1 className="text-3xl font-bold text-emerald-400">Şahsi Ajans & Komisyon Yönetim Paneli</h1>
+        <p className="text-zinc-400 text-sm mt-1">Şirket, İçerik Üreticisi, USDT Hakediş ve Net Ajans Kâr Takibi</p>
+      </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-zinc-900 p-8 rounded-2xl border border-zinc-800">
-        {/* ÖDEME KARTI */}
-        <div className="flex flex-col items-center justify-center p-6 bg-zinc-950 rounded-xl border border-zinc-800 text-center">
-          <h2 className="text-xl font-bold mb-2">USDT Ödeme Kasası</h2>
-          <p className="text-xs text-zinc-400 mb-4">Ağ: BNB Smart Chain (BEP20) / TRC20</p>
-
-          <div className="bg-white p-2 rounded-lg mb-4 border border-zinc-700">
-            <img 
-              src={qrImageUrl} 
-              alt="USDT Cüzdan QR Kodu" 
-              className="w-40 h-40 object-contain rounded"
-            />
-          </div>
-
-          <div className="w-full">
-            <label className="block text-xs text-zinc-500 mb-1 text-left">Resmi Cüzdan Adresi</label>
-            <div className="flex items-center bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs font-mono break-all mb-3">
-              <span className="flex-1 text-zinc-300">{adminWallet}</span>
-              <button
-                onClick={handleCopy}
-                className="ml-2 bg-emerald-600 hover:bg-emerald-500 text-white font-sans text-xs px-3 py-1.5 rounded transition"
-              >
-                {copied ? 'Kopyalandı!' : 'Kopyala'}
-              </button>
-            </div>
-          </div>
+      {/* VERİ GİRİŞ FORMLARI */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Şirket Ekle */}
+        <div className="bg-zinc-900 p-5 rounded-xl border border-zinc-800">
+          <h2 className="text-lg font-semibold mb-3 text-zinc-200">1. Şirket Ekle</h2>
+          <form onSubmit={handleAddCompany} className="space-y-3">
+            <input type="text" placeholder="Şirket / Marka Adı" value={companyName} onChange={e=>setCompanyName(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 p-2 rounded text-sm text-white" required />
+            <input type="text" placeholder="Cüzdan Adresi (USDT)" value={companyWallet} onChange={e=>setCompanyWallet(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 p-2 rounded text-sm text-white" />
+            <input type="number" placeholder="Sana Ödeyeceği USDT (Satış Başı)" value={companyComm} onChange={e=>setCompanyComm(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 p-2 rounded text-sm text-white" required />
+            <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-500 py-2 rounded font-semibold text-sm">Şirketi Kaydet</button>
+          </form>
         </div>
 
-        {/* İŞLEM ONAY & AFFILIATE */}
-        <div className="flex flex-col justify-between">
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Ödeme Bildirimi</h3>
-            <p className="text-xs text-zinc-400 mb-4">
-              Transferi yaptıktan sonra İşlem Kodunu (TxHash) aşağıya girerek aboneliğinizi aktif edebilirsiniz.
-            </p>
+        {/* Üretici Ekle */}
+        <div className="bg-zinc-900 p-5 rounded-xl border border-zinc-800">
+          <h2 className="text-lg font-semibold mb-3 text-zinc-200">2. İçerik Üreticisi Ekle</h2>
+          <form onSubmit={handleAddCreator} className="space-y-3">
+            <input type="text" placeholder="Üretici Adı / Kanal" value={creatorName} onChange={e=>setCreatorName(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 p-2 rounded text-sm text-white" required />
+            <input type="text" placeholder="Üretici USDT Cüzdanı" value={creatorWallet} onChange={e=>setCreatorWallet(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 p-2 rounded text-sm text-white" required />
+            <input type="number" placeholder="Üreticiye Ödeyeceğin USDT" value={creatorComm} onChange={e=>setCreatorComm(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 p-2 rounded text-sm text-white" required />
+            <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-500 py-2 rounded font-semibold text-sm">Üreticiyi Kaydet</button>
+          </form>
+        </div>
 
-            {submitted ? (
-              <div className="p-4 bg-emerald-950/50 border border-emerald-500/30 text-emerald-400 rounded-lg text-sm">
-                ✓ İşlem kodunuz Supabase veritabanına iletildi. Doğrulama yapıldıktan sonra erişiminiz tanımlanacaktır.
-              </div>
-            ) : (
-              <form onSubmit={handleSubmitTx} className="space-y-3">
-                <div>
-                  <input
-                    type="text"
-                    placeholder="0x... (TxHash / Transfer Kodu)"
-                    value={txHash}
-                    onChange={(e) => setTxHash(e.target.value)}
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-sm focus:outline-none focus:border-emerald-500 text-white font-mono"
-                    required
-                  />
-                </div>
-
-                {errorMessage && (
-                  <p className="text-xs text-red-500 font-medium">{errorMessage}</p>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 font-bold py-3 px-4 rounded-lg text-sm transition"
-                >
-                  {loading ? 'İşleniyor...' : 'Ödemeyi Onayla'}
-                </button>
-              </form>
-            )}
-          </div>
-
-          {/* REFERANS PANELİ */}
-          <div className="mt-8 pt-6 border-t border-zinc-800">
-            <h4 className="text-sm font-semibold mb-1 text-emerald-400">Yayıncı / Referans Paneli</h4>
-            <p className="text-xs text-zinc-400 mb-3">
-              Kendi referans linkinizle kullanıcı davet edin, her satıştan komisyon kazanın.
-            </p>
-            {user ? (
-              <div className="bg-zinc-950 p-3 rounded-lg border border-zinc-800 text-xs font-mono text-zinc-300">
-                Sizin Ref Linkiniz: <span className="text-emerald-400">?ref={user.id?.slice(0, 8)}</span>
-              </div>
-            ) : (
-              <p className="text-xs text-zinc-500">
-                * Özel referans linkinizi görmek için giriş yapmalısınız.
-              </p>
-            )}
-          </div>
+        {/* Eşleştirme Yap */}
+        <div className="bg-zinc-900 p-5 rounded-xl border border-zinc-800">
+          <h2 className="text-lg font-semibold mb-3 text-zinc-200">3. Şirket + Üretici Eşleştir</h2>
+          <form onSubmit={handleCreateMatch} className="space-y-3">
+            <select value={selectedCompany} onChange={e=>setSelectedCompany(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 p-2 rounded text-sm text-white" required>
+              <option value="">Şirket Seç</option>
+              {companies.map(c => <option key={c.id} value={c.id}>{c.name} ({c.commission_per_sale} USDT)</option>)}
+            </select>
+            <select value={selectedCreator} onChange={e=>setSelectedCreator(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 p-2 rounded text-sm text-white" required>
+              <option value="">Üretici Seç</option>
+              {creators.map(cr => <option key={cr.id} value={cr.id}>{cr.name} ({cr.commission_per_sale} USDT)</option>)}
+            </select>
+            <input type="text" placeholder="Özel Kod (Örn: ahmet10)" value={refCode} onChange={e=>setRefCode(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 p-2 rounded text-sm text-white" required />
+            <button type="submit" className="w-full bg-blue-600 hover:bg-blue-500 py-2 rounded font-semibold text-sm">Eşleştirmeyi Oluştur</button>
+          </form>
         </div>
       </div>
-    </section>
+
+      {/* EŞLEŞTİRME & NET KÂR LİSTESİ */}
+      <div className="bg-zinc-900 p-6 rounded-xl border border-zinc-800">
+        <h2 className="text-xl font-bold mb-4 text-emerald-400">Aktif Şirket - Üretici Eşleşmeleri & Net Marjlar</h2>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm text-zinc-300">
+            <thead className="bg-zinc-950 text-zinc-400 uppercase text-xs">
+              <tr>
+                <th className="p-3">Referans Kodu</th>
+                <th className="p-3">Şirket</th>
+                <th className="p-3">İçerik Üreticisi</th>
+                <th className="p-3">Şirketten Gelen</th>
+                <th className="p-3">Üreticiye Giden</th>
+                <th className="p-3 text-emerald-400">Senin Net Kârın</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-800">
+              {matches.map(m => {
+                const compComm = m.companies?.commission_per_sale || 0;
+                const creatComm = m.creators?.commission_per_sale || 0;
+                const netProfit = compComm - creatComm;
+                return (
+                  <tr key={m.id} className="hover:bg-zinc-950/50">
+                    <td className="p-3 font-mono font-bold text-blue-400">?ref={m.ref_code}</td>
+                    <td className="p-3">{m.companies?.name}</td>
+                    <td className="p-3">{m.creators?.name}</td>
+                    <td className="p-3 text-zinc-300">{compComm} USDT</td>
+                    <td className="p-3 text-zinc-300">{creatComm} USDT</td>
+                    <td className="p-3 font-bold text-emerald-400">+{netProfit} USDT / Satış</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* İŞLEM, İADE VE HAKEDİŞ TAKİBİ */}
+      <div className="bg-zinc-900 p-6 rounded-xl border border-zinc-800">
+        <h2 className="text-xl font-bold mb-4 text-emerald-400">İşlemler, İadeler ve Otomatik Hakediş Durumları</h2>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm text-zinc-300">
+            <thead className="bg-zinc-950 text-zinc-400 uppercase text-xs">
+              <tr>
+                <th className="p-3">TxHash</th>
+                <th className="p-3">Eşleşme</th>
+                <th className="p-3">Net Kâr</th>
+                <th className="p-3">Durum</th>
+                <th className="p-3">İşlem Yap</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-800">
+              {transactions.map(t => (
+                <tr key={t.id}>
+                  <td className="p-3 font-mono text-xs">{t.tx_hash || 'Bekliyor'}</td>
+                  <td className="p-3">{t.matches?.companies?.name} - {t.matches?.creators?.name}</td>
+                  <td className="p-3 text-emerald-400 font-bold">+{t.our_profit} USDT</td>
+                  <td className="p-3">
+                    <span className={`px-2 py-1 rounded text-xs font-bold ${
+                      t.status === 'refunded' ? 'bg-red-950 text-red-400' :
+                      t.status === 'creator_paid' ? 'bg-emerald-950 text-emerald-400' : 'bg-yellow-950 text-yellow-400'
+                    }`}>
+                      {t.status}
+                    </span>
+                  </td>
+                  <td className="p-3 space-x-2">
+                    <button onClick={()=>handleStatusChange(t.id, 'creator_paid')} className="bg-emerald-700 text-xs px-2 py-1 rounded">Ödendi</button>
+                    <button onClick={()=>handleStatusChange(t.id, 'refunded')} className="bg-red-700 text-xs px-2 py-1 rounded">İade / İptal</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   );
 }
