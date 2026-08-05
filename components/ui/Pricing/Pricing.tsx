@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import QRCode from 'react-qr-code';
 
 interface Props {
   user: any;
@@ -24,9 +23,10 @@ export default function Pricing({ user }: Props) {
   const handleSubmitTx = (e: React.FormEvent) => {
     e.preventDefault();
     if (!txHash) return;
-    // Tx Hash Supabase veya API'ye bildirilebilir
     setSubmitted(true);
   };
+
+  const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(adminWallet)}`;
 
   return (
     <section className="bg-black text-white py-12 px-4 max-w-4xl mx-auto">
@@ -43,10 +43,14 @@ export default function Pricing({ user }: Props) {
         {/* ÖDEME KARTI */}
         <div className="flex flex-col items-center justify-center p-6 bg-zinc-950 rounded-xl border border-zinc-800 text-center">
           <h2 className="text-xl font-bold mb-2">USDT Ödeme Kasası</h2>
-          <p className="text-xs text-zinc-400 mb-4">Ağ: BNB Smart Chain (BEP20) / Tron</p>
+          <p className="text-xs text-zinc-400 mb-4">Ağ: BNB Smart Chain (BEP20) / TRC20</p>
 
-          <div className="bg-white p-3 rounded-lg mb-4">
-            <QRCode value={adminWallet} size={160} />
+          <div className="bg-white p-2 rounded-lg mb-4 border border-zinc-700">
+            <img 
+              src={qrImageUrl} 
+              alt="USDT Cüzdan QR Kodu" 
+              className="w-40 h-40 object-contain rounded"
+            />
           </div>
 
           <div className="w-full">
@@ -97,7 +101,7 @@ export default function Pricing({ user }: Props) {
             )}
           </div>
 
-          {/* REFERANS PANELİ EKLENTİSİ */}
+          {/* REFERANS PANELİ */}
           <div className="mt-8 pt-6 border-t border-zinc-800">
             <h4 className="text-sm font-semibold mb-1 text-emerald-400">Yayıncı / Referans Paneli</h4>
             <p className="text-xs text-zinc-400 mb-3">
