@@ -7,24 +7,28 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-export default function AdminAgencyDashboard() {
+interface Props {
+  user?: any;
+  products?: any[];
+  subscription?: any;
+}
+
+export default function Pricing({ user, products, subscription }: Props) {
   const [companies, setCompanies] = useState<any[]>([]);
   const [creators, setCreators] = useState<any[]>([]);
   const [matches, setMatches] = useState<any[]>([]);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Yeni Şirket Formu
+  // Form State
   const [companyName, setCompanyName] = useState('');
   const [companyWallet, setCompanyWallet] = useState('');
   const [companyComm, setCompanyComm] = useState('');
 
-  // Yeni Üretici Formu
   const [creatorName, setCreatorName] = useState('');
   const [creatorWallet, setCreatorWallet] = useState('');
   const [creatorComm, setCreatorComm] = useState('');
 
-  // Eşleştirme Formu
   const [selectedCompany, setSelectedCompany] = useState('');
   const [selectedCreator, setSelectedCreator] = useState('');
   const [refCode, setRefCode] = useState('');
