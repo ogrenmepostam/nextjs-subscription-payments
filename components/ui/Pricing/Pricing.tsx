@@ -84,12 +84,41 @@ export default function Pricing({ user, products, subscription }: Props) {
     fetchData();
   };
 
+  // Ajans Net Kâr Hesaplamaları
+  const totalEarnedProfit = transactions
+    .filter(t => t.status === 'creator_paid')
+    .reduce((acc, t) => acc + ((t.company_amount || 0) - (t.creator_amount || 0)), 0);
+
+  const pendingProfit = transactions
+    .filter(t => t.status === 'pending')
+    .reduce((acc, t) => acc + ((t.company_amount || 0) - (t.creator_amount || 0)), 0);
+
+  const refundedProfit = transactions
+    .filter(t => t.status === 'refunded')
+    .reduce((acc, t) => acc + ((t.company_amount || 0) - (t.creator_amount || 0)), 0);
+
   return (
     <div className="min-h-screen bg-zinc-950 text-white p-6 max-w-7xl mx-auto space-y-10">
       <header className="border-b border-zinc-800 pb-4">
-        <h1 className="text-3xl font-bold text-emerald-400">Şahsi Ajans & Komisyon Yönetim Paneli</h1>
+        <h1 className="text-3xl font-bold text-emerald-400">Ana Yönetim Paneli (Admin)</h1>
         <p className="text-zinc-400 text-sm mt-1">Şirket, İçerik Üreticisi, USDT Hakediş ve Net Ajans Kâr Takibi</p>
       </header>
+
+      {/* METRİKLER VE BAKIYELER */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-zinc-900 p-5 rounded-xl border border-zinc-800">
+          <p className="text-zinc-400 text-xs uppercase font-bold">Tahsil Edilen Net Kâr</p>
+          <p className="text-3xl font-bold text-emerald-400 mt-2">+{totalEarnedProfit} USDT</p>
+        </div>
+        <div className="bg-zinc-900 p-5 rounded-xl border border-zinc-800">
+          <p className="text-zinc-400 text-xs uppercase font-bold">Bekleyen Net Kâr (Havuzda)</p>
+          <p className="text-3xl font-bold text-yellow-400 mt-2">+{pendingProfit} USDT</p>
+        </div>
+        <div className="bg-zinc-900 p-5 rounded-xl border border-zinc-800">
+          <p className="text-zinc-400 text-xs uppercase font-bold">İade Edilen / Düşen Kâr</p>
+          <p className="text-3xl font-bold text-red-400 mt-2">-{refundedProfit} USDT</p>
+        </div>
+      </div>
 
       {/* VERİ GİRİŞ FORMLARI */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -169,9 +198,9 @@ export default function Pricing({ user, products, subscription }: Props) {
         </div>
       </div>
 
-      {/* İŞLEM, İADE VE HAKEDİŞ TAKİBİ */}
+      {/* İŞLEM, İADE VE ÖDEME BİTİŞ TARİHİ TAKİBİ */}
       <div className="bg-zinc-900 p-6 rounded-xl border border-zinc-800">
-        <h2 className="text-xl font-bold mb-4 text-emerald-400">İşlemler, İadeler ve Otomatik Hakediş Durumları</h2>
+        <h2 className="text-xl font-bold mb-4 text-emerald-400">İşlemler, İadeler ve Tahsilat Tarihleri</h2>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm text-zinc-300">
             <thead className="bg-zinc-950 text-zinc-400 uppercase text-xs">
@@ -180,29 +209,42 @@ export default function Pricing({ user, products, subscription }: Props) {
                 <th className="p-3">Eşleşme</th>
                 <th className="p-3">Net Kâr</th>
                 <th className="p-3">Durum</th>
+                <th className="p-3">Ödeme / Tahsilat Tarihi</th>
                 <th className="p-3">İşlem Yap</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-800">
-              {transactions.map(t => (
-                <tr key={t.id}>
-                  <td className="p-3 font-mono text-xs">{t.tx_hash || 'Bekliyor'}</td>
-                  <td className="p-3">{t.matches?.companies?.name} - {t.matches?.creators?.name}</td>
-                  <td className="p-3 text-emerald-400 font-bold">+{t.our_profit} USDT</td>
-                  <td className="p-3">
-                    <span className={`px-2 py-1 rounded text-xs font-bold ${
-                      t.status === 'refunded' ? 'bg-red-950 text-red-400' :
-                      t.status === 'creator_paid' ? 'bg-emerald-950 text-emerald-400' : 'bg-yellow-950 text-yellow-400'
-                    }`}>
-                      {t.status}
-                    </span>
-                  </td>
-                  <td className="p-3 space-x-2">
-                    <button onClick={()=>handleStatusChange(t.id, 'creator_paid')} className="bg-emerald-700 text-xs px-2 py-1 rounded">Ödendi</button>
-                    <button onClick={()=>handleStatusChange(t.id, 'refunded')} className="bg-red-700 text-xs px-2 py-1 rounded">İade / İptal</button>
-                  </td>
-                </tr>
-              ))}
+              {transactions.map(t => {
+                const netProfit = (t.company_amount || 0) - (t.creator_amount || 0);
+                const payoutDateStr = t.payout_date 
+                  ? new Date(t.payout_date).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' })
+                  : 'Bekliyor';
+
+                return (
+                  <tr key={t.id}>
+                    <td className="p-3 font-mono text-xs">{t.tx_hash || 'Bekliyor'}</td>
+                    <td className="p-3">{t.matches?.companies?.name} - {t.matches?.creators?.name}</td>
+                    <td className={`p-3 font-bold ${t.status === 'refunded' ? 'text-red-400 line-through' : 'text-emerald-400'}`}>
+                      +{netProfit} USDT
+                    </td>
+                    <td className="p-3">
+                      <span className={`px-2 py-1 rounded text-xs font-bold ${
+                        t.status === 'refunded' ? 'bg-red-950 text-red-400' :
+                        t.status === 'creator_paid' ? 'bg-emerald-950 text-emerald-400' : 'bg-yellow-950 text-yellow-400'
+                      }`}>
+                        {t.status === 'refunded' ? 'İade Edildi' : t.status === 'creator_paid' ? 'Tamamlandı' : 'Beklemede'}
+                      </span>
+                    </td>
+                    <td className="p-3 text-xs text-zinc-400 font-mono">
+                      {t.status === 'refunded' ? 'İptal Edildi' : payoutDateStr}
+                    </td>
+                    <td className="p-3 space-x-2">
+                      <button onClick={()=>handleStatusChange(t.id, 'creator_paid')} className="bg-emerald-700 hover:bg-emerald-600 text-xs px-2 py-1 rounded">Ödendi</button>
+                      <button onClick={()=>handleStatusChange(t.id, 'refunded')} className="bg-red-700 hover:bg-red-600 text-xs px-2 py-1 rounded">İade / İptal</button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
