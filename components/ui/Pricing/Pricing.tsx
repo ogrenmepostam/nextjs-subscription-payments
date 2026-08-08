@@ -1,4 +1,4 @@
-'use client';
+        'use client';
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
@@ -14,6 +14,10 @@ interface Props {
 }
 
 export default function Pricing({ user, products, subscription }: Props) {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [inputPassword, setInputPassword] = useState('');
+  const [loginError, setLoginError] = useState(false);
+
   const [companies, setCompanies] = useState<any[]>([]);
   const [creators, setCreators] = useState<any[]>([]);
   const [matches, setMatches] = useState<any[]>([]);
@@ -34,8 +38,31 @@ export default function Pricing({ user, products, subscription }: Props) {
   const [refCode, setRefCode] = useState('');
 
   useEffect(() => {
-    fetchData();
+    const authStatus = sessionStorage.getItem('admin_authenticated');
+    if (authStatus === 'true') {
+      setIsAuthenticated(true);
+      fetchData();
+    }
   }, []);
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    const adminPass = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'Levent05/*+-.?!-#'; 
+
+    if (inputPassword === adminPass) {
+      sessionStorage.setItem('admin_authenticated', 'true');
+      setIsAuthenticated(true);
+      setLoginError(false);
+      fetchData();
+    } else {
+      setLoginError(true);
+    }
+  };
+
+  const handleLogout = () => {
+    sessionStorage.removeItem('admin_authenticated');
+    setIsAuthenticated(false);
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -84,7 +111,38 @@ export default function Pricing({ user, products, subscription }: Props) {
     fetchData();
   };
 
-  // Ajans Net Kâr Hesaplamaları
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
+        <div className="bg-zinc-900 border border-zinc-800 p-8 rounded-2xl w-full max-w-md space-y-6">
+          <div className="text-center space-y-2">
+            <h1 className="text-2xl font-bold text-emerald-400">Yönetici Girişi</h1>
+            <p className="text-zinc-400 text-sm">Ajans Komisyon Paneline Erişmek İçin Şifre Giriniz</p>
+          </div>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <input
+                type="password"
+                placeholder="Yönetici Şifresi"
+                value={inputPassword}
+                onChange={(e) => setInputPassword(e.target.value)}
+                className="w-full bg-zinc-950 border border-zinc-800 p-3 rounded-lg text-white text-sm focus:outline-none focus:border-emerald-500"
+                required
+              />
+            </div>
+            {loginError && <p className="text-red-500 text-xs text-center">Hatalı şifre girdiniz!</p>}
+            <button
+              type="submit"
+              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg text-sm transition"
+            >
+              Giriş Yap
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
   const totalEarnedProfit = transactions
     .filter(t => t.status === 'creator_paid')
     .reduce((acc, t) => acc + ((t.company_amount || 0) - (t.creator_amount || 0)), 0);
@@ -99,9 +157,14 @@ export default function Pricing({ user, products, subscription }: Props) {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white p-6 max-w-7xl mx-auto space-y-10">
-      <header className="border-b border-zinc-800 pb-4">
-        <h1 className="text-3xl font-bold text-emerald-400">Ana Yönetim Paneli (Admin)</h1>
-        <p className="text-zinc-400 text-sm mt-1">Şirket, İçerik Üreticisi, USDT Hakediş ve Net Ajans Kâr Takibi</p>
+      <header className="border-b border-zinc-800 pb-4 flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-emerald-400">Ana Yönetim Paneli (Admin)</h1>
+          <p className="text-zinc-400 text-sm mt-1">Şirket, İçerik Üreticisi, USDT Hakediş ve Net Ajans Kâr Takibi</p>
+        </div>
+        <button onClick={handleLogout} className="bg-zinc-800 hover:bg-zinc-700 text-xs px-4 py-2 rounded-lg text-zinc-300">
+          Çıkış Yap
+        </button>
       </header>
 
       {/* METRİKLER VE BAKIYELER */}
