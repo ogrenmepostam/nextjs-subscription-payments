@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export default function Navbar() {
   return (
-    <header className="w-full bg-black/80 backdrop-blur border-b border-zinc-900 px-6 py-4 flex justify-between items-center sticky top-0 z-50">
+    <header className="w-full bg-zinc-950/80 backdrop-blur border-b border-zinc-900 px-6 py-4 flex justify-between items-center sticky top-0 z-50">
       
       {/* Sol Logo */}
       <Link href="/" className="flex items-center gap-2 font-bold text-white text-base">
@@ -10,17 +10,26 @@ export default function Navbar() {
         <span>fladnag</span>
       </Link>
 
-      {/* Sağ Linkler ve Portal Girişi */}
-      <div className="flex items-center gap-6 text-xs">
-        <Link href="/brand-login" className="text-gray-300 hover:text-white transition-colors">
+      {/* Sağ Üst Giriş Butonları (Admin Girişi Creator Login'in Yanına Eklendi) */}
+      <div className="flex items-center gap-4 text-xs font-medium">
+        <Link 
+          href="/signin" 
+          className="text-gray-300 hover:text-white transition-colors"
+        >
           Brand Login
         </Link>
-        <Link href="/creator-login" className="text-gray-300 hover:text-white transition-colors">
+
+        <Link 
+          href="/signin" 
+          className="text-gray-300 hover:text-white transition-colors"
+        >
           Creator Login
         </Link>
+
+        {/* Admin Girişi (Internal Portal) - Creator Login'in Yanında */}
         <Link
           href="/admin"
-          className="bg-zinc-900 hover:bg-zinc-800 text-gray-200 border border-zinc-800 px-3 py-1.5 rounded-md flex items-center gap-1.5 transition-colors"
+          className="bg-zinc-900 hover:bg-zinc-800 text-emerald-400 border border-zinc-800 px-3 py-1.5 rounded-md flex items-center gap-1.5 transition-colors"
         >
           <span>🔒</span> Internal Portal
         </Link>
