@@ -7,7 +7,13 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-export default function Home() {
+interface Props {
+  user?: any;
+  products?: any[];
+  subscription?: any;
+}
+
+export default function Pricing({ user, products, subscription }: Props) {
   const [currentView, setCurrentView] = useState<'home' | 'admin' | 'brand_dash' | 'creator_dash'>('home');
   const [authModal, setAuthModal] = useState<'brand' | 'creator' | null>(null);
   const [isSignUp, setIsSignUp] = useState(false);
@@ -201,11 +207,6 @@ export default function Home() {
     ]);
 
     setRefCode(''); setCompanyCommOverride(''); setCreatorCommOverride('');
-    fetchAdminData();
-  };
-
-  const handleStatusChange = async (txId: string, newStatus: string) => {
-    await supabase.from('transactions').update({ status: newStatus }).eq('id', txId);
     fetchAdminData();
   };
 
