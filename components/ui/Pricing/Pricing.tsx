@@ -169,7 +169,7 @@ export default function Pricing({ user, products, subscription }: Props) {
     if (data) {
       setActiveBrand(data);
       localStorage.setItem('brand_user', JSON.stringify(data));
-      alert('Brand settings updated successfully!');
+      alert('Account settings updated successfully!');
     }
   };
 
@@ -216,25 +216,25 @@ export default function Pricing({ user, products, subscription }: Props) {
       <nav className="border-b border-zinc-800 bg-zinc-950/80 backdrop-blur sticky top-0 z-40 px-6 py-4 flex justify-between items-center">
         <div className="flex items-center space-x-2 cursor-pointer" onClick={() => setCurrentView('home')}>
           <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center font-bold text-black">A</div>
-          <span className="font-bold text-xl tracking-wide">AffiliateHub</span>
+          <span className="font-bold text-xl tracking-wide">Apex Media Network</span>
         </div>
 
         <div className="flex items-center space-x-4">
           {activeBrand ? (
             <button onClick={() => setCurrentView('brand_dash')} className="text-sm font-semibold text-emerald-400 hover:underline">
-              Brand Portal ({activeBrand.name})
+              Client Portal ({activeBrand.name})
             </button>
           ) : activeCreator ? (
             <button onClick={() => setCurrentView('creator_dash')} className="text-sm font-semibold text-blue-400 hover:underline">
-              Creator Portal ({activeCreator.name})
+              Publisher Portal ({activeCreator.name})
             </button>
           ) : (
             <>
               <button onClick={() => { setAuthModal('brand'); setIsSignUp(false); }} className="text-sm font-medium hover:text-emerald-400 transition">
-                Brand Login
+                Client Access
               </button>
               <button onClick={() => { setAuthModal('creator'); setIsSignUp(false); }} className="text-sm font-medium hover:text-blue-400 transition">
-                Creator Login
+                Publisher Access
               </button>
             </>
           )}
@@ -243,36 +243,36 @@ export default function Pricing({ user, products, subscription }: Props) {
             onClick={() => { setCurrentView('admin'); if(isAdminAuth) fetchAdminData(); }} 
             className="bg-zinc-800 hover:bg-zinc-700 text-xs px-3 py-2 rounded-lg text-zinc-300 font-mono"
           >
-            🔒 Admin Portal
+            🔒 Internal Portal
           </button>
         </div>
       </nav>
 
-      {/* 1. LANDING PAGE (ENGLISH) */}
+      {/* 1. LANDING PAGE (PRIVATE AGENCY / MANAGED NETWORK) */}
       {currentView === 'home' && (
         <main className="max-w-6xl mx-auto px-6 py-20 space-y-24">
           <section className="text-center space-y-6">
             <span className="bg-emerald-950 text-emerald-400 text-xs font-semibold px-4 py-1.5 rounded-full border border-emerald-800">
-              Automated Performance Marketing Network
+              Managed Performance Marketing Network
             </span>
             <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight max-w-4xl mx-auto leading-tight">
-              Scale Your Web3 & Tech SaaS with Verified Creators
+              Performance-Driven Growth & Campaign Operations
             </h1>
             <p className="text-zinc-400 text-lg max-w-2xl mx-auto">
-              Automated USDT commission tracking, custom referral codes, and instant Webhook integrations for brands and content creators.
+              Real-time conversion logging, custom campaign attribution, and verified USDT settlements for agency-managed partnerships.
             </p>
             <div className="flex justify-center gap-4 pt-4">
               <button
                 onClick={() => { setAuthModal('brand'); setIsSignUp(true); }}
                 className="bg-emerald-500 hover:bg-emerald-400 text-black font-bold px-8 py-4 rounded-xl transition text-sm"
               >
-                Join as Brand / Company
+                Client Portal Login
               </button>
               <button
                 onClick={() => { setAuthModal('creator'); setIsSignUp(true); }}
                 className="bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-white font-bold px-8 py-4 rounded-xl transition text-sm"
               >
-                Join as Creator
+                Publisher Portal Login
               </button>
             </div>
           </section>
@@ -281,30 +281,30 @@ export default function Pricing({ user, products, subscription }: Props) {
           <section className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-zinc-900/50 border border-zinc-800 p-6 rounded-2xl space-y-3">
               <div className="text-emerald-400 text-2xl font-bold">01</div>
-              <h3 className="font-bold text-lg">Instant Webhook API</h3>
-              <p className="text-zinc-400 text-sm">Plug your Checkout or SaaS backend directly into our automated Webhook endpoint for zero-delay commission logging.</p>
+              <h3 className="font-bold text-lg">Secure Webhook Integration</h3>
+              <p className="text-zinc-400 text-sm">Directly connect your checkout system to our secure logging endpoint for automated conversion verification.</p>
             </div>
             <div className="bg-zinc-900/50 border border-zinc-800 p-6 rounded-2xl space-y-3">
               <div className="text-emerald-400 text-2xl font-bold">02</div>
-              <h3 className="font-bold text-lg">USDT Crypto Settlements</h3>
-              <p className="text-zinc-400 text-sm">Direct wallet-to-wallet USDT accounting. Transparent payout tracking with clear due dates.</p>
+              <h3 className="font-bold text-lg">Transparent Accounting</h3>
+              <p className="text-zinc-400 text-sm">Clear performance reporting and USDT crypto settlements with real-time payout visibility.</p>
             </div>
             <div className="bg-zinc-900/50 border border-zinc-800 p-6 rounded-2xl space-y-3">
               <div className="text-emerald-400 text-2xl font-bold">03</div>
-              <h3 className="font-bold text-lg">Custom Referral Links</h3>
-              <p className="text-zinc-400 text-sm">Creators get unique branded ref links to attach to videos, articles, or social campaigns.</p>
+              <h3 className="font-bold text-lg">Vetted Distribution</h3>
+              <p className="text-zinc-400 text-sm">Targeted campaign execution managed directly through approved publisher network nodes.</p>
             </div>
           </section>
         </main>
       )}
 
-      {/* 2. BRAND DASHBOARD (ENGLISH) */}
+      {/* 2. BRAND DASHBOARD (CLIENT PORTAL) */}
       {currentView === 'brand_dash' && activeBrand && (
         <div className="max-w-6xl mx-auto px-6 py-10 space-y-8">
           <div className="flex justify-between items-center border-b border-zinc-800 pb-6">
             <div>
-              <h1 className="text-3xl font-bold text-emerald-400">{activeBrand.name} — Brand Portal</h1>
-              <p className="text-zinc-400 text-sm">Manage your USDT settlement wallet and Webhook API integrations.</p>
+              <h1 className="text-3xl font-bold text-emerald-400">{activeBrand.name} — Client Portal</h1>
+              <p className="text-zinc-400 text-sm">Manage your campaign integration and payout accounting.</p>
             </div>
             <button onClick={() => logoutUser('brand')} className="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 px-4 py-2 rounded-lg text-xs">
               Sign Out
@@ -314,22 +314,22 @@ export default function Pricing({ user, products, subscription }: Props) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* BRAND SETTINGS */}
             <div className="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 space-y-4">
-              <h2 className="text-xl font-bold text-zinc-200">Account & API Settings</h2>
+              <h2 className="text-xl font-bold text-zinc-200">Integration & Account Settings</h2>
               <form onSubmit={handleUpdateBrandSettings} className="space-y-4">
                 <div>
-                  <label className="text-xs text-zinc-400 font-semibold block mb-1">USDT Wallet Address (For Commission Payouts)</label>
+                  <label className="text-xs text-zinc-400 font-semibold block mb-1">USDT Settlement Wallet Address</label>
                   <input type="text" value={brandWallet} onChange={e=>setBrandWallet(e.target.value)} placeholder="0x... or T..." className="w-full bg-zinc-950 border border-zinc-800 p-3 rounded-lg text-sm text-white font-mono" />
                 </div>
                 <div>
-                  <label className="text-xs text-zinc-400 font-semibold block mb-1">Webhook URL (Your System Endpoint)</label>
+                  <label className="text-xs text-zinc-400 font-semibold block mb-1">Webhook URL (System Endpoint)</label>
                   <input type="url" value={brandWebhook} onChange={e=>setBrandWebhook(e.target.value)} placeholder="https://yourdomain.com/api/webhook" className="w-full bg-zinc-950 border border-zinc-800 p-3 rounded-lg text-sm text-white font-mono" />
                 </div>
                 <div>
-                  <label className="text-xs text-zinc-400 font-semibold block mb-1">Commission Offered Per Sale (USDT)</label>
+                  <label className="text-xs text-zinc-400 font-semibold block mb-1">Agreed Rate Per Conversion (USDT)</label>
                   <input type="number" value={brandComm} onChange={e=>setBrandComm(e.target.value)} placeholder="e.g. 100" className="w-full bg-zinc-950 border border-zinc-800 p-3 rounded-lg text-sm text-white" />
                 </div>
                 <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-500 py-3 rounded-lg font-bold text-sm">
-                  Save Brand Settings
+                  Save Account Settings
                 </button>
               </form>
             </div>
@@ -337,12 +337,12 @@ export default function Pricing({ user, products, subscription }: Props) {
             {/* API KEY & INSTRUCTIONS */}
             <div className="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 space-y-4">
               <h2 className="text-xl font-bold text-zinc-200">Your Webhook API Key</h2>
-              <p className="text-zinc-400 text-xs">Use this API Key to authenticate sales callbacks sent from your checkout system.</p>
+              <p className="text-zinc-400 text-xs">Use this API Key to authenticate sales callbacks sent from your system.</p>
               <div className="bg-zinc-950 p-4 rounded-xl border border-zinc-800 font-mono text-xs text-emerald-400 break-all">
                 {activeBrand.api_key || 'Generate Key by saving settings'}
               </div>
               <div className="text-xs text-zinc-500 space-y-1">
-                <p>• Send POST request when a user converts via ref code.</p>
+                <p>• Send POST request when a user converts via campaign code.</p>
                 <p>• Payload structure: <code className="text-zinc-300">{`{ ref_code: "code", amount: 100 }`}</code></p>
               </div>
             </div>
@@ -350,13 +350,13 @@ export default function Pricing({ user, products, subscription }: Props) {
         </div>
       )}
 
-      {/* 3. CREATOR DASHBOARD (ENGLISH) */}
+      {/* 3. CREATOR DASHBOARD (PUBLISHER PORTAL) */}
       {currentView === 'creator_dash' && activeCreator && (
         <div className="max-w-6xl mx-auto px-6 py-10 space-y-8">
           <div className="flex justify-between items-center border-b border-zinc-800 pb-6">
             <div>
-              <h1 className="text-3xl font-bold text-blue-400">{activeCreator.name} — Creator Portal</h1>
-              <p className="text-zinc-400 text-sm">Track your custom referral link, active rate, and USDT payouts.</p>
+              <h1 className="text-3xl font-bold text-blue-400">{activeCreator.name} — Publisher Portal</h1>
+              <p className="text-zinc-400 text-sm">Track your assigned campaign links and USDT payouts.</p>
             </div>
             <button onClick={() => logoutUser('creator')} className="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 px-4 py-2 rounded-lg text-xs">
               Sign Out
@@ -380,14 +380,14 @@ export default function Pricing({ user, products, subscription }: Props) {
 
             {/* COMMISSION OVERVIEW */}
             <div className="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 space-y-4">
-              <h2 className="text-xl font-bold text-zinc-200">Your Rate & Payout Terms</h2>
+              <h2 className="text-xl font-bold text-zinc-200">Your Campaign Rate</h2>
               <div className="bg-zinc-950 p-4 rounded-xl border border-zinc-800 space-y-2">
-                <p className="text-xs text-zinc-400">Commission Per Conversion:</p>
+                <p className="text-xs text-zinc-400">Fixed Rate Per Conversion:</p>
                 <p className="text-2xl font-bold text-emerald-400">
-                  {activeCreator.commission_per_sale ? `${activeCreator.commission_per_sale} USDT` : 'Pending Match Assignment'}
+                  {activeCreator.commission_per_sale ? `${activeCreator.commission_per_sale} USDT` : 'Pending Campaign Assignment'}
                 </p>
               </div>
-              <p className="text-xs text-zinc-500">Payouts are settled directly to your wallet upon confirmation by the agency administrator.</p>
+              <p className="text-xs text-zinc-500">Payouts are settled directly to your wallet upon confirmation by campaign administrators.</p>
             </div>
           </div>
         </div>
@@ -483,7 +483,7 @@ export default function Pricing({ user, products, subscription }: Props) {
         </div>
       )}
 
-      {/* AUTH MODAL (BRAND & CREATOR LOGIN/SIGNUP) */}
+      {/* AUTH MODAL (CLIENT & PUBLISHER ACCESS) */}
       {authModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-zinc-900 border border-zinc-800 p-8 rounded-2xl w-full max-w-md space-y-6 relative">
@@ -493,14 +493,14 @@ export default function Pricing({ user, products, subscription }: Props) {
                 {isSignUp ? 'Create Account' : 'Welcome Back'}
               </h2>
               <p className="text-xs text-zinc-400 capitalize">
-                {authModal === 'brand' ? 'Brand / Company Portal' : 'Content Creator Portal'}
+                {authModal === 'brand' ? 'Client Access Portal' : 'Publisher Access Portal'}
               </p>
             </div>
 
             <form onSubmit={handleAuthSubmit} className="space-y-4">
               {isSignUp && (
                 <div>
-                  <label className="text-xs text-zinc-400 block mb-1">Company / Name</label>
+                  <label className="text-xs text-zinc-400 block mb-1">Company / Publisher Name</label>
                   <input type="text" value={name} onChange={e=>setName(e.target.value)} required className="w-full bg-zinc-950 border border-zinc-800 p-3 rounded-lg text-sm text-white" />
                 </div>
               )}
