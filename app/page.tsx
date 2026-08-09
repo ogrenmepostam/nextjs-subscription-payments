@@ -3,10 +3,10 @@ import Link from 'next/link';
 export default function Home() {
   return (
     <div className="min-h-screen bg-black text-white flex flex-col justify-between">
-      {/* Orijinal Hero Alanı */}
+      {/* Hero Alanı */}
       <main className="flex-1 flex flex-col items-center justify-center px-4 pt-16 pb-12 text-center">
         
-        {/* Üst Rozet (Badge) */}
+        {/* Üst Rozet */}
         <div className="mb-6">
           <span className="bg-emerald-950/80 text-emerald-400 border border-emerald-800/50 text-xs px-3 py-1.5 rounded-full font-medium">
             Performance Marketing & Affiliate Network
@@ -18,9 +18,9 @@ export default function Home() {
           Scale Your Sales on Pure Performance
         </h1>
 
-        {/* Alt Açıklama */}
+        {/* Alt Açıklama (Tam İstediğin Gibi) */}
         <p className="mt-6 text-gray-400 max-w-2xl text-sm sm:text-base leading-relaxed">
-          Connecting growing digital brands with content creators. Pay only for verified sales, earn guaranteed USDT commissions on assigned campaigns.
+          Connecting growing digital brands with content creators. Pay only for verified sales.
         </p>
 
         {/* Butonlar */}
