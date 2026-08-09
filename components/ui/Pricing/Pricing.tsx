@@ -222,19 +222,19 @@ export default function Pricing({ user, products, subscription }: Props) {
         <div className="flex items-center space-x-4">
           {activeBrand ? (
             <button onClick={() => setCurrentView('brand_dash')} className="text-sm font-semibold text-emerald-400 hover:underline">
-              Client Portal ({activeBrand.name})
+              Brand Portal ({activeBrand.name})
             </button>
           ) : activeCreator ? (
             <button onClick={() => setCurrentView('creator_dash')} className="text-sm font-semibold text-blue-400 hover:underline">
-              Publisher Portal ({activeCreator.name})
+              Creator Portal ({activeCreator.name})
             </button>
           ) : (
             <>
               <button onClick={() => { setAuthModal('brand'); setIsSignUp(false); }} className="text-sm font-medium hover:text-emerald-400 transition">
-                Client Access
+                Brand Login
               </button>
               <button onClick={() => { setAuthModal('creator'); setIsSignUp(false); }} className="text-sm font-medium hover:text-blue-400 transition">
-                Publisher Access
+                Creator Login
               </button>
             </>
           )}
@@ -248,31 +248,31 @@ export default function Pricing({ user, products, subscription }: Props) {
         </div>
       </nav>
 
-      {/* 1. LANDING PAGE (PRIVATE AGENCY / MANAGED NETWORK) */}
+      {/* 1. LANDING PAGE */}
       {currentView === 'home' && (
         <main className="max-w-6xl mx-auto px-6 py-20 space-y-24">
           <section className="text-center space-y-6">
             <span className="bg-emerald-950 text-emerald-400 text-xs font-semibold px-4 py-1.5 rounded-full border border-emerald-800">
-              Managed Performance Marketing Network
+              Performance Marketing & Affiliate Network
             </span>
             <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight max-w-4xl mx-auto leading-tight">
-              Performance-Driven Growth & Campaign Operations
+              Scale Your Sales on Pure Performance
             </h1>
             <p className="text-zinc-400 text-lg max-w-2xl mx-auto">
-              Real-time conversion logging, custom campaign attribution, and verified USDT settlements for agency-managed partnerships.
+              Connecting growing digital brands with content creators. Pay only for verified sales, earn guaranteed USDT commissions on assigned campaigns.
             </p>
             <div className="flex justify-center gap-4 pt-4">
               <button
                 onClick={() => { setAuthModal('brand'); setIsSignUp(true); }}
                 className="bg-emerald-500 hover:bg-emerald-400 text-black font-bold px-8 py-4 rounded-xl transition text-sm"
               >
-                Client Portal Login
+                Join as Brand / Company
               </button>
               <button
                 onClick={() => { setAuthModal('creator'); setIsSignUp(true); }}
                 className="bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-white font-bold px-8 py-4 rounded-xl transition text-sm"
               >
-                Publisher Portal Login
+                Join as Creator / Affiliate
               </button>
             </div>
           </section>
@@ -281,30 +281,30 @@ export default function Pricing({ user, products, subscription }: Props) {
           <section className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-zinc-900/50 border border-zinc-800 p-6 rounded-2xl space-y-3">
               <div className="text-emerald-400 text-2xl font-bold">01</div>
-              <h3 className="font-bold text-lg">Secure Webhook Integration</h3>
-              <p className="text-zinc-400 text-sm">Directly connect your checkout system to our secure logging endpoint for automated conversion verification.</p>
+              <h3 className="font-bold text-lg">For Brands & SaaS</h3>
+              <p className="text-zinc-400 text-sm">Set your bounty per sale. Integrate via Webhook and only pay commission when actual revenue is generated.</p>
             </div>
             <div className="bg-zinc-900/50 border border-zinc-800 p-6 rounded-2xl space-y-3">
               <div className="text-emerald-400 text-2xl font-bold">02</div>
-              <h3 className="font-bold text-lg">Transparent Accounting</h3>
-              <p className="text-zinc-400 text-sm">Clear performance reporting and USDT crypto settlements with real-time payout visibility.</p>
+              <h3 className="font-bold text-lg">For Creators & Affiliates</h3>
+              <p className="text-zinc-400 text-sm">Get assigned to converting campaigns. Share your custom tracking link and withdraw earnings directly in USDT.</p>
             </div>
             <div className="bg-zinc-900/50 border border-zinc-800 p-6 rounded-2xl space-y-3">
               <div className="text-emerald-400 text-2xl font-bold">03</div>
-              <h3 className="font-bold text-lg">Vetted Distribution</h3>
-              <p className="text-zinc-400 text-sm">Targeted campaign execution managed directly through approved publisher network nodes.</p>
+              <h3 className="font-bold text-lg">Automated Tracking</h3>
+              <p className="text-zinc-400 text-sm">Real-time attribution system ensures every sale is accurately tracked and transparently credited.</p>
             </div>
           </section>
         </main>
       )}
 
-      {/* 2. BRAND DASHBOARD (CLIENT PORTAL) */}
+      {/* 2. BRAND DASHBOARD */}
       {currentView === 'brand_dash' && activeBrand && (
         <div className="max-w-6xl mx-auto px-6 py-10 space-y-8">
           <div className="flex justify-between items-center border-b border-zinc-800 pb-6">
             <div>
-              <h1 className="text-3xl font-bold text-emerald-400">{activeBrand.name} — Client Portal</h1>
-              <p className="text-zinc-400 text-sm">Manage your campaign integration and payout accounting.</p>
+              <h1 className="text-3xl font-bold text-emerald-400">{activeBrand.name} — Brand Dashboard</h1>
+              <p className="text-zinc-400 text-sm">Manage campaign integration and conversion bounties.</p>
             </div>
             <button onClick={() => logoutUser('brand')} className="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 px-4 py-2 rounded-lg text-xs">
               Sign Out
@@ -312,12 +312,11 @@ export default function Pricing({ user, products, subscription }: Props) {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* BRAND SETTINGS */}
             <div className="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 space-y-4">
               <h2 className="text-xl font-bold text-zinc-200">Integration & Account Settings</h2>
               <form onSubmit={handleUpdateBrandSettings} className="space-y-4">
                 <div>
-                  <label className="text-xs text-zinc-400 font-semibold block mb-1">USDT Settlement Wallet Address</label>
+                  <label className="text-xs text-zinc-400 font-semibold block mb-1">USDT Deposit Wallet Address</label>
                   <input type="text" value={brandWallet} onChange={e=>setBrandWallet(e.target.value)} placeholder="0x... or T..." className="w-full bg-zinc-950 border border-zinc-800 p-3 rounded-lg text-sm text-white font-mono" />
                 </div>
                 <div>
@@ -325,7 +324,7 @@ export default function Pricing({ user, products, subscription }: Props) {
                   <input type="url" value={brandWebhook} onChange={e=>setBrandWebhook(e.target.value)} placeholder="https://yourdomain.com/api/webhook" className="w-full bg-zinc-950 border border-zinc-800 p-3 rounded-lg text-sm text-white font-mono" />
                 </div>
                 <div>
-                  <label className="text-xs text-zinc-400 font-semibold block mb-1">Agreed Rate Per Conversion (USDT)</label>
+                  <label className="text-xs text-zinc-400 font-semibold block mb-1">Commission Offered Per Sale (USDT)</label>
                   <input type="number" value={brandComm} onChange={e=>setBrandComm(e.target.value)} placeholder="e.g. 100" className="w-full bg-zinc-950 border border-zinc-800 p-3 rounded-lg text-sm text-white" />
                 </div>
                 <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-500 py-3 rounded-lg font-bold text-sm">
@@ -334,29 +333,28 @@ export default function Pricing({ user, products, subscription }: Props) {
               </form>
             </div>
 
-            {/* API KEY & INSTRUCTIONS */}
             <div className="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 space-y-4">
               <h2 className="text-xl font-bold text-zinc-200">Your Webhook API Key</h2>
-              <p className="text-zinc-400 text-xs">Use this API Key to authenticate sales callbacks sent from your system.</p>
+              <p className="text-zinc-400 text-xs">Use this API Key to authenticate sales callbacks sent from your checkout system.</p>
               <div className="bg-zinc-950 p-4 rounded-xl border border-zinc-800 font-mono text-xs text-emerald-400 break-all">
-                {activeBrand.api_key || 'Generate Key by saving settings'}
+                {activeBrand.api_key || 'Save settings to view API Key'}
               </div>
               <div className="text-xs text-zinc-500 space-y-1">
-                <p>• Send POST request when a user converts via campaign code.</p>
-                <p>• Payload structure: <code className="text-zinc-300">{`{ ref_code: "code", amount: 100 }`}</code></p>
+                <p>• Your assigned creators will drive traffic using unique tracking codes.</p>
+                <p>• Network automatically logs conversions and handles attribution.</p>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* 3. CREATOR DASHBOARD (PUBLISHER PORTAL) */}
+      {/* 3. CREATOR DASHBOARD */}
       {currentView === 'creator_dash' && activeCreator && (
         <div className="max-w-6xl mx-auto px-6 py-10 space-y-8">
           <div className="flex justify-between items-center border-b border-zinc-800 pb-6">
             <div>
-              <h1 className="text-3xl font-bold text-blue-400">{activeCreator.name} — Publisher Portal</h1>
-              <p className="text-zinc-400 text-sm">Track your assigned campaign links and USDT payouts.</p>
+              <h1 className="text-3xl font-bold text-blue-400">{activeCreator.name} — Creator Dashboard</h1>
+              <p className="text-zinc-400 text-sm">Track your assigned campaigns and USDT earnings.</p>
             </div>
             <button onClick={() => logoutUser('creator')} className="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 px-4 py-2 rounded-lg text-xs">
               Sign Out
@@ -364,36 +362,34 @@ export default function Pricing({ user, products, subscription }: Props) {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* WALLET SETTINGS */}
             <div className="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 space-y-4">
-              <h2 className="text-xl font-bold text-zinc-200">Payout Wallet Address</h2>
+              <h2 className="text-xl font-bold text-zinc-200">Payout Settings</h2>
               <form onSubmit={handleUpdateCreatorSettings} className="space-y-4">
                 <div>
                   <label className="text-xs text-zinc-400 font-semibold block mb-1">Your USDT Receiver Wallet Address</label>
                   <input type="text" value={creatorWallet} onChange={e=>setCreatorWallet(e.target.value)} placeholder="0x... or T..." className="w-full bg-zinc-950 border border-zinc-800 p-3 rounded-lg text-sm text-white font-mono" required />
                 </div>
                 <button type="submit" className="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-lg font-bold text-sm">
-                  Save Wallet Address
+                  Save Receiver Wallet
                 </button>
               </form>
             </div>
 
-            {/* COMMISSION OVERVIEW */}
             <div className="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 space-y-4">
-              <h2 className="text-xl font-bold text-zinc-200">Your Campaign Rate</h2>
+              <h2 className="text-xl font-bold text-zinc-200">Assigned Campaign Rate</h2>
               <div className="bg-zinc-950 p-4 rounded-xl border border-zinc-800 space-y-2">
-                <p className="text-xs text-zinc-400">Fixed Rate Per Conversion:</p>
+                <p className="text-xs text-zinc-400">Fixed Commission Per Sale:</p>
                 <p className="text-2xl font-bold text-emerald-400">
-                  {activeCreator.commission_per_sale ? `${activeCreator.commission_per_sale} USDT` : 'Pending Campaign Assignment'}
+                  {activeCreator.commission_per_sale ? `${activeCreator.commission_per_sale} USDT` : 'Campaign Pending Assignment'}
                 </p>
               </div>
-              <p className="text-xs text-zinc-500">Payouts are settled directly to your wallet upon confirmation by campaign administrators.</p>
+              <p className="text-xs text-zinc-500">Your custom campaign link will be activated once network match is confirmed.</p>
             </div>
           </div>
         </div>
       )}
 
-      {/* 4. TÜRKÇE ADMIN PANELİ (SENİN YÖNETİM MERKEZİN) */}
+      {/* 4. TÜRKÇE ADMIN PANELİ */}
       {currentView === 'admin' && (
         <div className="max-w-7xl mx-auto px-6 py-10 space-y-8">
           {!isAdminAuth ? (
@@ -422,7 +418,6 @@ export default function Pricing({ user, products, subscription }: Props) {
                 <button onClick={() => setCurrentView('home')} className="bg-zinc-800 hover:bg-zinc-700 text-xs px-4 py-2 rounded-lg">Ana Sayfaya Dön</button>
               </header>
 
-              {/* TEK TIKLA EŞLEŞTİRME FORMU */}
               <div className="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 space-y-4">
                 <h2 className="text-lg font-bold text-emerald-400">Tek Tıkla Şirket & İçerik Üreticisi Eşleştir</h2>
                 <form onSubmit={handleCreateMatch} className="grid grid-cols-1 md:grid-cols-5 gap-4">
@@ -446,7 +441,6 @@ export default function Pricing({ user, products, subscription }: Props) {
                 </form>
               </div>
 
-              {/* AKTİF EŞLEŞMELER */}
               <div className="bg-zinc-900 p-6 rounded-2xl border border-zinc-800">
                 <h2 className="text-xl font-bold mb-4 text-emerald-400">Aktif Eşleşmeler ve Marjlar</h2>
                 <table className="w-full text-left text-sm text-zinc-300">
@@ -483,7 +477,7 @@ export default function Pricing({ user, products, subscription }: Props) {
         </div>
       )}
 
-      {/* AUTH MODAL (CLIENT & PUBLISHER ACCESS) */}
+      {/* AUTH MODAL */}
       {authModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-zinc-900 border border-zinc-800 p-8 rounded-2xl w-full max-w-md space-y-6 relative">
@@ -493,14 +487,14 @@ export default function Pricing({ user, products, subscription }: Props) {
                 {isSignUp ? 'Create Account' : 'Welcome Back'}
               </h2>
               <p className="text-xs text-zinc-400 capitalize">
-                {authModal === 'brand' ? 'Client Access Portal' : 'Publisher Access Portal'}
+                {authModal === 'brand' ? 'Brand Access Portal' : 'Creator Access Portal'}
               </p>
             </div>
 
             <form onSubmit={handleAuthSubmit} className="space-y-4">
               {isSignUp && (
                 <div>
-                  <label className="text-xs text-zinc-400 block mb-1">Company / Publisher Name</label>
+                  <label className="text-xs text-zinc-400 block mb-1">Company / Creator Name</label>
                   <input type="text" value={name} onChange={e=>setName(e.target.value)} required className="w-full bg-zinc-950 border border-zinc-800 p-3 rounded-lg text-sm text-white" />
                 </div>
               )}
