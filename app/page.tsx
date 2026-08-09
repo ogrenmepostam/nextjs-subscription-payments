@@ -4,35 +4,20 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-black text-white flex flex-col justify-between selection:bg-emerald-500 selection:text-black">
       
-      {/* Üst Menü (Navbar) - Temizlendi */}
-      <nav className="border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 font-bold text-xl tracking-tight">
-            <span className="bg-emerald-500 text-black font-extrabold px-2 py-0.5 rounded text-xs">F</span>
-            <span>fladnag</span>
-          </Link>
-          
-          <div className="flex items-center gap-4">
-            <Link 
-              href="/signin" 
-              className="text-sm font-medium text-gray-300 hover:text-white transition-colors border border-zinc-800 bg-zinc-900/50 hover:bg-zinc-800 px-4 py-2 rounded-lg"
-            >
-              Sign In
-            </Link>
-          </div>
-        </div>
-      </nav>
-
       {/* Ana Bölüm (Hero) */}
       <main className="max-w-5xl mx-auto px-4 py-20 text-center flex-1 flex flex-col items-center justify-center">
+        
+        {/* Üst Rozet */}
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 text-xs font-semibold mb-6">
           Performance Marketing & Affiliate Network
         </div>
         
+        {/* Dev Başlık */}
         <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight max-w-3xl leading-tight mb-6">
           Scale Your Sales on Pure Performance
         </h1>
         
+        {/* Alt Açıklama */}
         <p className="text-gray-400 text-base sm:text-lg max-w-2xl mb-8 leading-relaxed">
           Connecting growing digital brands with content creators. Pay only for verified sales.
         </p>
