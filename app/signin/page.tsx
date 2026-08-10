@@ -4,10 +4,12 @@ import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
 
-// Vercel / Environment değişkenlerinden Supabase istemcisini oluşturur
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// URL'in sonundaki fazla / işaretlerini ve boşlukları otomatik temizler
+const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const cleanUrl = rawUrl.trim().replace(/\/+$/, '');
+const supabaseAnonKey = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim();
+
+const supabase = createClient(cleanUrl, supabaseAnonKey);
 
 export default function AuthPage() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -24,6 +26,15 @@ export default function AuthPage() {
     setLoading(true);
     setMessage(null);
 
+    if (!cleanUrl || !supabaseAnonKey) {
+      setMessage({
+        text: 'Supabase URL or Key is missing in Vercel Environment Variables!',
+        type: 'error',
+      });
+      setLoading(false);
+      return;
+    }
+
     try {
       if (isSignUp) {
         const { error } = await supabase.auth.signUp({
@@ -39,7 +50,7 @@ export default function AuthPage() {
         if (error) throw error;
 
         setMessage({
-          text: 'Registration successful! Check your email or try signing in.',
+          text: 'Registration successful! Check your account.',
           type: 'success',
         });
       } else {
@@ -82,7 +93,7 @@ export default function AuthPage() {
           </Link>
         </div>
 
-        {/* Sekme Değiştirici (Sign In / Sign Up) */}
+        {/* Sekme Değiştirici */}
         <div className="flex bg-zinc-900 p-1 rounded-xl mb-6 border border-zinc-800">
           <button
             type="button"
@@ -155,7 +166,7 @@ export default function AuthPage() {
             />
           </div>
 
-          {/* Hukuki Onay Kutucuğu */}
+          {/* Onay Kutusu */}
           <div className="flex items-start gap-2 my-4 text-xs text-gray-400">
             <input 
               type="checkbox" 
