@@ -4,12 +4,11 @@ import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
 
-// URL'in sonundaki fazla / işaretlerini ve boşlukları otomatik temizler
 const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const cleanUrl = rawUrl.trim().replace(/\/+$/, '');
 const supabaseAnonKey = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim();
 
-const supabase = createClient(cleanUrl, supabaseAnonKey);
+const supabase = createClient(cleanUrl || 'https://missing-url.supabase.co', supabaseAnonKey);
 
 export default function AuthPage() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -28,7 +27,7 @@ export default function AuthPage() {
 
     if (!cleanUrl || !supabaseAnonKey) {
       setMessage({
-        text: 'Supabase URL or Key is missing in Vercel Environment Variables!',
+        text: `EKSİK DEĞİŞKEN! URL: "${cleanUrl}" | Key Var Mı: ${!!supabaseAnonKey}`,
         type: 'error',
       });
       setLoading(false);
@@ -41,9 +40,7 @@ export default function AuthPage() {
           email,
           password,
           options: {
-            data: {
-              full_name: fullName,
-            },
+            data: { full_name: fullName },
           },
         });
 
@@ -72,8 +69,9 @@ export default function AuthPage() {
         }, 1000);
       }
     } catch (err: any) {
+      // Hatanın detayını ve kullanılan URL'i doğrudan kırmızı kutuya basıyoruz
       setMessage({
-        text: err.message || 'An error occurred during authentication.',
+        text: `Hata: ${err.message} | Bağlanılmaya Çalışılan URL: [${cleanUrl}]`,
         type: 'error',
       });
     } finally {
@@ -93,7 +91,7 @@ export default function AuthPage() {
           </Link>
         </div>
 
-        {/* Sekme Değiştirici */}
+        {/* Sekmeler */}
         <div className="flex bg-zinc-900 p-1 rounded-xl mb-6 border border-zinc-800">
           <button
             type="button"
@@ -115,9 +113,9 @@ export default function AuthPage() {
           </button>
         </div>
 
-        {/* Bilgilendirme / Hata Mesajı */}
+        {/* Hata / Mesaj Kutusu */}
         {message && (
-          <div className={`mb-4 p-3 rounded-lg text-xs font-medium border ${
+          <div className={`mb-4 p-3 rounded-lg text-xs font-medium border break-all ${
             message.type === 'error' 
               ? 'bg-red-500/10 border-red-500/20 text-red-400' 
               : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
@@ -166,7 +164,6 @@ export default function AuthPage() {
             />
           </div>
 
-          {/* Onay Kutusu */}
           <div className="flex items-start gap-2 my-4 text-xs text-gray-400">
             <input 
               type="checkbox" 
