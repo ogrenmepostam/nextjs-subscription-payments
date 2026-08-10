@@ -17,7 +17,6 @@ export default function CreatorDashboard() {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
-        // Oturum yoksa giriş ekranına yönlendir
         router.push('/signin');
         return;
       }
@@ -32,7 +31,7 @@ export default function CreatorDashboard() {
   if (loading) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <p className="text-sm text-zinc-500">Loading Creator Panel...</p>
+        <p className="text-xs text-zinc-500">Loading Creator Panel...</p>
       </div>
     );
   }
