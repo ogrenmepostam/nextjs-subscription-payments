@@ -4,11 +4,10 @@ import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
 
-const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const cleanUrl = rawUrl.trim().replace(/\/+$/, '');
+const cleanUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').trim().replace(/\/+$/, '');
 const supabaseAnonKey = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim();
 
-const supabase = createClient(cleanUrl || 'https://missing-url.supabase.co', supabaseAnonKey);
+const supabase = createClient(cleanUrl, supabaseAnonKey);
 
 export default function AuthPage() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -25,15 +24,6 @@ export default function AuthPage() {
     setLoading(true);
     setMessage(null);
 
-    if (!cleanUrl || !supabaseAnonKey) {
-      setMessage({
-        text: `EKSİK DEĞİŞKEN! URL: "${cleanUrl}" | Key Var Mı: ${!!supabaseAnonKey}`,
-        type: 'error',
-      });
-      setLoading(false);
-      return;
-    }
-
     try {
       if (isSignUp) {
         const { error } = await supabase.auth.signUp({
@@ -47,7 +37,7 @@ export default function AuthPage() {
         if (error) throw error;
 
         setMessage({
-          text: 'Registration successful! Check your account.',
+          text: 'Registration successful! You can now sign in.',
           type: 'success',
         });
       } else {
@@ -59,19 +49,21 @@ export default function AuthPage() {
         if (error) throw error;
 
         setMessage({
-          text: 'Login successful! Redirecting...',
+          text: 'Login successful! Redirecting to creator panel...',
           type: 'success',
         });
 
+        // Giriş yapıldıktan sonra Creator paneline yönlendirir ve oturumu yeniler
         setTimeout(() => {
-          router.push('/');
-          router.refresh();
-        }, 1000);
+          window.location.href = '/creator';
+        }, 800);
       }
     } catch (err: any) {
-      // Hatanın detayını ve kullanılan URL'i doğrudan kırmızı kutuya basıyoruz
+      // Hata detaylarını dışarıya kapatıp genel ve güvenli mesaj gösteriyoruz
       setMessage({
-        text: `Hata: ${err.message} | Bağlanılmaya Çalışılan URL: [${cleanUrl}]`,
+        text: isSignUp 
+          ? 'An error occurred during registration. Please check your information.' 
+          : 'Invalid login credentials. Please try again.',
         type: 'error',
       });
     } finally {
@@ -113,9 +105,9 @@ export default function AuthPage() {
           </button>
         </div>
 
-        {/* Hata / Mesaj Kutusu */}
+        {/* Mesaj Kutusu */}
         {message && (
-          <div className={`mb-4 p-3 rounded-lg text-xs font-medium border break-all ${
+          <div className={`mb-4 p-3 rounded-lg text-xs font-medium border ${
             message.type === 'error' 
               ? 'bg-red-500/10 border-red-500/20 text-red-400' 
               : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
@@ -164,17 +156,20 @@ export default function AuthPage() {
             />
           </div>
 
-          <div className="flex items-start gap-2 my-4 text-xs text-gray-400">
-            <input 
-              type="checkbox" 
-              id="terms-check" 
-              required 
-              className="mt-0.5 w-4 h-4 rounded border-zinc-800 bg-zinc-900 text-emerald-500 focus:ring-emerald-500 cursor-pointer"
-            />
-            <label htmlFor="terms-check" className="cursor-pointer select-none leading-tight">
-              I agree to the <a href="/terms" target="_blank" className="underline text-white hover:text-emerald-400">Terms of Service</a> and <a href="/privacy" target="_blank" className="underline text-white hover:text-emerald-400">Privacy Policy</a> of <strong>fladnag</strong>.
-            </label>
-          </div>
+          {/* Onay Kutusu (Sadece Kayıt Olunurken Görünür) */}
+          {isSignUp && (
+            <div className="flex items-start gap-2 my-4 text-xs text-gray-400">
+              <input 
+                type="checkbox" 
+                id="terms-check" 
+                required 
+                className="mt-0.5 w-4 h-4 rounded border-zinc-800 bg-zinc-900 text-emerald-500 focus:ring-emerald-500 cursor-pointer"
+              />
+              <label htmlFor="terms-check" className="cursor-pointer select-none leading-tight">
+                I agree to the <a href="/terms" target="_blank" className="underline text-white hover:text-emerald-400">Terms of Service</a> and <a href="/privacy" target="_blank" className="underline text-white hover:text-emerald-400">Privacy Policy</a> of <strong>fladnag</strong>.
+              </label>
+            </div>
+          )}
 
           <button
             type="submit"
@@ -183,6 +178,20 @@ export default function AuthPage() {
           >
             {loading ? 'Processing...' : isSignUp ? 'Create Account' : 'Sign In'}
           </button>
+
+          {/* Giriş Yap Sekmesindeki Pasif Bilgilendirme Metni */}
+          {!isSignUp && (
+            <p className="mt-4 text-center text-[11px] text-gray-500">
+              By signing in, you agree to our{' '}
+              <a href="/terms" target="_blank" className="underline text-gray-400 hover:text-white">
+                Terms of Service
+              </a>{' '}
+              and{' '}
+              <a href="/privacy" target="_blank" className="underline text-gray-400 hover:text-white">
+                Privacy Policy
+              </a>.
+            </p>
+          )}
         </form>
 
       </div>
