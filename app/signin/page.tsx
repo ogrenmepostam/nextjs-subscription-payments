@@ -1,8 +1,13 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
+
+// Vercel / Environment değişkenlerinden Supabase istemcisini oluşturur
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export default function AuthPage() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -12,7 +17,6 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'error' | 'success' } | null>(null);
 
-  const supabase = createClientComponentClient();
   const router = useRouter();
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -22,7 +26,6 @@ export default function AuthPage() {
 
     try {
       if (isSignUp) {
-        // Supabase Veritabanına Yeni Kullanıcı Kaydı
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -36,11 +39,10 @@ export default function AuthPage() {
         if (error) throw error;
 
         setMessage({
-          text: 'Registration successful! Check your email for confirmation.',
+          text: 'Registration successful! Check your email or try signing in.',
           type: 'success',
         });
       } else {
-        // Supabase Veritabanından Kullanıcı Girişi
         const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
@@ -52,8 +54,7 @@ export default function AuthPage() {
           text: 'Login successful! Redirecting...',
           type: 'success',
         });
-        
-        // Giriş başarılı olunca ana sayfaya yönlendir
+
         setTimeout(() => {
           router.push('/');
           router.refresh();
