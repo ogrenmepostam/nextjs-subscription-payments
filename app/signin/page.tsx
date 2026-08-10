@@ -41,11 +41,11 @@ export default function AuthPage() {
         if (error) throw error;
 
         setMessage({
-          text: 'Registration successful! You can now sign in.',
+          text: 'Registration successful! Please check your email or try signing in.',
           type: 'success',
         });
       } else {
-        // 1. Giriş Yapma İşlemi
+        // Giriş Yapma İşlemi
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
@@ -54,15 +54,14 @@ export default function AuthPage() {
         if (error) throw error;
 
         setMessage({
-          text: 'Login successful! Redirecting to your panel...',
+          text: 'Login successful! Redirecting...',
           type: 'success',
         });
 
-        // 2. Kullanıcı verisini ve rolünü alıyoruz
+        // Kullanıcının rolünü al ve doğru panele yönlendir
         const user = data.user;
         const userRole = user?.user_metadata?.role || 'creator';
 
-        // 3. ROL KONTROLÜ VE PANALE YÖNLENDİRME (Creator, Brand/Company, Default)
         setTimeout(() => {
           if (userRole === 'creator') {
             window.location.href = '/creator';
@@ -74,11 +73,23 @@ export default function AuthPage() {
         }, 800);
       }
     } catch (err: any) {
-      // Hata detaylarını dışarıya kapatıp güvenli ve genel mesaj gösteriyoruz
+      console.error("Auth Hatası:", err);
+
+      // Hatayı tespit edip ekrana anlaşılır yazdırıyoruz
+      let errorMessage = 'An unexpected error occurred. Please try again.';
+
+      if (err.message?.includes('Password should be at least')) {
+        errorMessage = 'Password should be at least 6 characters.';
+      } else if (err.message?.includes('User already registered')) {
+        errorMessage = 'This email is already registered. Please sign in instead.';
+      } else if (err.message?.includes('Invalid login credentials')) {
+        errorMessage = 'Invalid email or password. Please try again.';
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+
       setMessage({
-        text: isSignUp 
-          ? 'An error occurred during registration. Please check your information.' 
-          : 'Invalid login credentials. Please try again.',
+        text: errorMessage,
         type: 'error',
       });
     } finally {
@@ -171,7 +182,7 @@ export default function AuthPage() {
             />
           </div>
 
-          {/* Onay Kutusu (Yalnızca Kayıt Olunurken Görünür) */}
+          {/* Onay Kutusu (Sadece Kayıt Olunurken / Sign Up Sekmesinde Görünür) */}
           {isSignUp && (
             <div className="flex items-start gap-2 my-4 text-xs text-gray-400">
               <input 
