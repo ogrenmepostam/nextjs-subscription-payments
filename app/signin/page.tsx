@@ -14,6 +14,7 @@ export default function AuthPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [role, setRole] = useState<'creator' | 'brand'>('creator'); // Rol seçimi (Varsayılan: creator)
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'error' | 'success' } | null>(null);
 
@@ -33,7 +34,7 @@ export default function AuthPage() {
           options: {
             data: { 
               full_name: fullName,
-              role: 'creator'
+              role: role // Kullanıcının seçtiği rol kaydediliyor (creator veya brand)
             },
           },
         });
@@ -107,7 +108,7 @@ export default function AuthPage() {
           </Link>
         </div>
 
-        {/* Sekmeler */}
+        {/* Giriş Yap / Kayıt Ol Sekmeleri */}
         <div className="flex bg-zinc-900 p-1 rounded-xl mb-6 border border-zinc-800">
           <button
             type="button"
@@ -142,12 +143,47 @@ export default function AuthPage() {
 
         {/* Form */}
         <form className="space-y-4" onSubmit={handleAuth}>
+          
+          {/* Kayıt Ekranına Özel Hesap Tipi Seçimi (Creator vs Brand) */}
           {isSignUp && (
             <div>
-              <label className="block text-xs font-medium text-gray-400 mb-1">Full Name</label>
+              <label className="block text-xs font-medium text-gray-400 mb-2">I am registering as a:</label>
+              <div className="grid grid-cols-2 gap-2 mb-4">
+                <button
+                  type="button"
+                  onClick={() => setRole('creator')}
+                  className={`p-3 rounded-xl border text-xs font-semibold flex flex-col items-center gap-1 transition-all ${
+                    role === 'creator'
+                      ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400'
+                      : 'border-zinc-800 bg-black text-gray-400 hover:border-zinc-700'
+                  }`}
+                >
+                  <span className="font-bold text-sm">Creator</span>
+                  <span className="text-[10px] text-gray-500 font-normal">Influencer / Author</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setRole('brand')}
+                  className={`p-3 rounded-xl border text-xs font-semibold flex flex-col items-center gap-1 transition-all ${
+                    role === 'brand'
+                      ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400'
+                      : 'border-zinc-800 bg-black text-gray-400 hover:border-zinc-700'
+                  }`}
+                >
+                  <span className="font-bold text-sm">Brand / Company</span>
+                  <span className="text-[10px] text-gray-500 font-normal">Sponsor / Business</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {isSignUp && (
+            <div>
+              <label className="block text-xs font-medium text-gray-400 mb-1">Full Name / Company Name</label>
               <input
                 type="text"
-                placeholder="John Doe"
+                placeholder={role === 'creator' ? 'John Doe' : 'Acme Corp'}
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 required
