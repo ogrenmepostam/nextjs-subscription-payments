@@ -33,7 +33,7 @@ export default function AuthPage() {
           options: {
             data: { 
               full_name: fullName,
-              role: 'creator' // Varsayılan kayıt rolü
+              role: 'creator'
             },
           },
         });
@@ -58,7 +58,6 @@ export default function AuthPage() {
           type: 'success',
         });
 
-        // Kullanıcının rolünü al ve doğru panele yönlendir
         const user = data.user;
         const userRole = user?.user_metadata?.role || 'creator';
 
@@ -75,7 +74,6 @@ export default function AuthPage() {
     } catch (err: any) {
       console.error("Auth Hatası:", err);
 
-      // Hatayı tespit edip ekrana anlaşılır yazdırıyoruz
       let errorMessage = 'An unexpected error occurred. Please try again.';
 
       if (err.message?.includes('Password should be at least')) {
@@ -182,7 +180,7 @@ export default function AuthPage() {
             />
           </div>
 
-          {/* Onay Kutusu (Sadece Kayıt Olunurken / Sign Up Sekmesinde Görünür) */}
+          {/* Onay Kutusu (Sadece Sign Up Sekmesinde Görünür) */}
           {isSignUp && (
             <div className="flex items-start gap-2 my-4 text-xs text-gray-400">
               <input 
@@ -205,7 +203,6 @@ export default function AuthPage() {
             {loading ? 'Processing...' : isSignUp ? 'Create Account' : 'Sign In'}
           </button>
 
-          {/* Giriş Yap Sekmesindeki Pasif Bilgilendirme Metni */}
           {!isSignUp && (
             <p className="mt-4 text-center text-[11px] text-gray-500">
               By signing in, you agree to our{' '}
