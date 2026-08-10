@@ -1,9 +1,73 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useRouter } from 'next/navigation';
 
 export default function AuthPage() {
   const [isSignUp, setIsSignUp] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<{ text: string; type: 'error' | 'success' } | null>(null);
+
+  const supabase = createClientComponentClient();
+  const router = useRouter();
+
+  const handleAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage(null);
+
+    try {
+      if (isSignUp) {
+        // Supabase Veritabanına Yeni Kullanıcı Kaydı
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              full_name: fullName,
+            },
+          },
+        });
+
+        if (error) throw error;
+
+        setMessage({
+          text: 'Registration successful! Check your email for confirmation.',
+          type: 'success',
+        });
+      } else {
+        // Supabase Veritabanından Kullanıcı Girişi
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (error) throw error;
+
+        setMessage({
+          text: 'Login successful! Redirecting...',
+          type: 'success',
+        });
+        
+        // Giriş başarılı olunca ana sayfaya yönlendir
+        setTimeout(() => {
+          router.push('/');
+          router.refresh();
+        }, 1000);
+      }
+    } catch (err: any) {
+      setMessage({
+        text: err.message || 'An error occurred during authentication.',
+        type: 'error',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col justify-center items-center px-4 py-12">
@@ -21,7 +85,7 @@ export default function AuthPage() {
         <div className="flex bg-zinc-900 p-1 rounded-xl mb-6 border border-zinc-800">
           <button
             type="button"
-            onClick={() => setIsSignUp(false)}
+            onClick={() => { setIsSignUp(false); setMessage(null); }}
             className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
               !isSignUp ? 'bg-emerald-500 text-black shadow' : 'text-gray-400 hover:text-white'
             }`}
@@ -30,7 +94,7 @@ export default function AuthPage() {
           </button>
           <button
             type="button"
-            onClick={() => setIsSignUp(true)}
+            onClick={() => { setIsSignUp(true); setMessage(null); }}
             className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
               isSignUp ? 'bg-emerald-500 text-black shadow' : 'text-gray-400 hover:text-white'
             }`}
@@ -39,14 +103,27 @@ export default function AuthPage() {
           </button>
         </div>
 
+        {/* Bilgilendirme / Hata Mesajı */}
+        {message && (
+          <div className={`mb-4 p-3 rounded-lg text-xs font-medium border ${
+            message.type === 'error' 
+              ? 'bg-red-500/10 border-red-500/20 text-red-400' 
+              : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+          }`}>
+            {message.text}
+          </div>
+        )}
+
         {/* Form */}
-        <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+        <form className="space-y-4" onSubmit={handleAuth}>
           {isSignUp && (
             <div>
               <label className="block text-xs font-medium text-gray-400 mb-1">Full Name</label>
               <input
                 type="text"
                 placeholder="John Doe"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
                 required
                 className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
               />
@@ -58,6 +135,8 @@ export default function AuthPage() {
             <input
               type="email"
               placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
               className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
             />
@@ -68,6 +147,8 @@ export default function AuthPage() {
             <input
               type="password"
               placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
               className="w-full bg-black border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
             />
@@ -88,9 +169,10 @@ export default function AuthPage() {
 
           <button
             type="submit"
-            className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-semibold py-2.5 rounded-lg text-sm transition-colors mt-2"
+            disabled={loading}
+            className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-semibold py-2.5 rounded-lg text-sm transition-colors mt-2 disabled:opacity-50"
           >
-            {isSignUp ? 'Create Account' : 'Sign In'}
+            {loading ? 'Processing...' : isSignUp ? 'Create Account' : 'Sign In'}
           </button>
         </form>
 
