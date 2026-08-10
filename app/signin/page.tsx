@@ -26,11 +26,15 @@ export default function AuthPage() {
 
     try {
       if (isSignUp) {
+        // Kayıt Olma İşlemi
         const { error } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            data: { full_name: fullName },
+            data: { 
+              full_name: fullName,
+              role: 'creator' // Varsayılan kayıt rolü
+            },
           },
         });
 
@@ -41,7 +45,8 @@ export default function AuthPage() {
           type: 'success',
         });
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
+        // 1. Giriş Yapma İşlemi
+        const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
@@ -49,17 +54,27 @@ export default function AuthPage() {
         if (error) throw error;
 
         setMessage({
-          text: 'Login successful! Redirecting to creator panel...',
+          text: 'Login successful! Redirecting to your panel...',
           type: 'success',
         });
 
-        // Giriş yapıldıktan sonra Creator paneline yönlendirir ve oturumu yeniler
+        // 2. Kullanıcı verisini ve rolünü alıyoruz
+        const user = data.user;
+        const userRole = user?.user_metadata?.role || 'creator';
+
+        // 3. ROL KONTROLÜ VE PANALE YÖNLENDİRME (Creator, Brand/Company, Default)
         setTimeout(() => {
-          window.location.href = '/creator';
+          if (userRole === 'creator') {
+            window.location.href = '/creator';
+          } else if (userRole === 'brand' || userRole === 'company') {
+            window.location.href = '/brand';
+          } else {
+            window.location.href = '/dashboard';
+          }
         }, 800);
       }
     } catch (err: any) {
-      // Hata detaylarını dışarıya kapatıp genel ve güvenli mesaj gösteriyoruz
+      // Hata detaylarını dışarıya kapatıp güvenli ve genel mesaj gösteriyoruz
       setMessage({
         text: isSignUp 
           ? 'An error occurred during registration. Please check your information.' 
@@ -156,7 +171,7 @@ export default function AuthPage() {
             />
           </div>
 
-          {/* Onay Kutusu (Sadece Kayıt Olunurken Görünür) */}
+          {/* Onay Kutusu (Yalnızca Kayıt Olunurken Görünür) */}
           {isSignUp && (
             <div className="flex items-start gap-2 my-4 text-xs text-gray-400">
               <input 
