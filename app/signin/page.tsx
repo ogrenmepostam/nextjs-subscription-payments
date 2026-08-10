@@ -1,8 +1,8 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 const cleanUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').trim().replace(/\/+$/, '');
 const supabaseAnonKey = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim();
@@ -14,11 +14,12 @@ export default function AuthPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
-  const [role, setRole] = useState<'creator' | 'brand'>('creator'); // Rol seçimi (Varsayılan: creator)
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'error' | 'success' } | null>(null);
 
-  const router = useRouter();
+  const searchParams = useSearchParams();
+  // URL'den role değerini oku, gelmediyse varsayılan olarak 'creator' al
+  const roleParam = searchParams.get('role') || 'creator'; 
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,14 +28,13 @@ export default function AuthPage() {
 
     try {
       if (isSignUp) {
-        // Kayıt Olma İşlemi
         const { error } = await supabase.auth.signUp({
           email,
           password,
           options: {
             data: { 
               full_name: fullName,
-              role: role // Kullanıcının seçtiği rol kaydediliyor (creator veya brand)
+              role: roleParam // Ana sayfadan gelen role kaydedilir
             },
           },
         });
@@ -46,7 +46,6 @@ export default function AuthPage() {
           type: 'success',
         });
       } else {
-        // Giriş Yapma İşlemi
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
@@ -60,7 +59,7 @@ export default function AuthPage() {
         });
 
         const user = data.user;
-        const userRole = user?.user_metadata?.role || 'creator';
+        const userRole = user?.user_metadata?.role || roleParam;
 
         setTimeout(() => {
           if (userRole === 'creator') {
@@ -143,47 +142,15 @@ export default function AuthPage() {
 
         {/* Form */}
         <form className="space-y-4" onSubmit={handleAuth}>
-          
-          {/* Kayıt Ekranına Özel Hesap Tipi Seçimi (Creator vs Brand) */}
-          {isSignUp && (
-            <div>
-              <label className="block text-xs font-medium text-gray-400 mb-2">I am registering as a:</label>
-              <div className="grid grid-cols-2 gap-2 mb-4">
-                <button
-                  type="button"
-                  onClick={() => setRole('creator')}
-                  className={`p-3 rounded-xl border text-xs font-semibold flex flex-col items-center gap-1 transition-all ${
-                    role === 'creator'
-                      ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400'
-                      : 'border-zinc-800 bg-black text-gray-400 hover:border-zinc-700'
-                  }`}
-                >
-                  <span className="font-bold text-sm">Creator</span>
-                  <span className="text-[10px] text-gray-500 font-normal">Influencer / Author</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setRole('brand')}
-                  className={`p-3 rounded-xl border text-xs font-semibold flex flex-col items-center gap-1 transition-all ${
-                    role === 'brand'
-                      ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400'
-                      : 'border-zinc-800 bg-black text-gray-400 hover:border-zinc-700'
-                  }`}
-                >
-                  <span className="font-bold text-sm">Brand / Company</span>
-                  <span className="text-[10px] text-gray-500 font-normal">Sponsor / Business</span>
-                </button>
-              </div>
-            </div>
-          )}
 
           {isSignUp && (
             <div>
-              <label className="block text-xs font-medium text-gray-400 mb-1">Full Name / Company Name</label>
+              <label className="block text-xs font-medium text-gray-400 mb-1">
+                {roleParam === 'brand' ? 'Company Name' : 'Full Name'}
+              </label>
               <input
                 type="text"
-                placeholder={role === 'creator' ? 'John Doe' : 'Acme Corp'}
+                placeholder={roleParam === 'brand' ? 'Acme Corp' : 'John Doe'}
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 required
@@ -216,7 +183,6 @@ export default function AuthPage() {
             />
           </div>
 
-          {/* Onay Kutusu (Sadece Sign Up Sekmesinde Görünür) */}
           {isSignUp && (
             <div className="flex items-start gap-2 my-4 text-xs text-gray-400">
               <input 
