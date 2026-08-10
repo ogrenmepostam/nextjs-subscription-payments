@@ -10,15 +10,16 @@ const supabaseAnonKey = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim()
 const supabase = createClient(cleanUrl, supabaseAnonKey);
 
 function AuthForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const roleParam = searchParams.get('role') || 'creator';
+
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'error' | 'success' } | null>(null);
-
-  const searchParams = useSearchParams();
-  const roleParam = searchParams.get('role') || 'creator';
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,13 +63,13 @@ function AuthForm() {
 
         setTimeout(() => {
           if (userRole === 'creator') {
-            window.location.href = '/creator';
+            router.push('/creator');
           } else if (userRole === 'brand' || userRole === 'company') {
-            window.location.href = '/brand';
+            router.push('/brand');
           } else {
-            window.location.href = '/dashboard';
+            router.push('/dashboard');
           }
-        }, 800);
+        }, 500);
       }
     } catch (err: any) {
       console.error("Auth Hatası:", err);
@@ -104,7 +105,7 @@ function AuthForm() {
         </Link>
       </div>
 
-      {/* Giriş Yap / Kayıt Ol Sekmeleri */}
+      {/* Sekmeler */}
       <div className="flex bg-zinc-900 p-1 rounded-xl mb-6 border border-zinc-800">
         <button
           type="button"
@@ -126,7 +127,7 @@ function AuthForm() {
         </button>
       </div>
 
-      {/* Mesaj Kutusu */}
+      {/* Mesaj */}
       {message && (
         <div className={`mb-4 p-3 rounded-lg text-xs font-medium border ${
           message.type === 'error' 
