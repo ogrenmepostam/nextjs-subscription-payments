@@ -171,29 +171,29 @@ export default function AdminDashboard() {
             )}
           </div>
 
+          {/* Ödeme Onay Alanı (Manuel "Ödendi" İşaretleme) */}
           <div className="bg-zinc-950 border border-zinc-800 p-6 rounded-xl">
-            <h2 className="text-base font-bold text-white mb-4">Bekleyen USDT Çekimleri</h2>
+            <h2 className="text-base font-bold text-white mb-4">Ödeme Onay Listesi (Manuel)</h2>
             {pendingPayouts.length === 0 ? (
               <div className="border border-dashed border-zinc-800 rounded-lg p-8 text-center text-xs text-gray-500">
-                Onay bekleyen çekim talebi yok.
+                Bekleyen ödeme veya USDT aktarımı bulunmuyor.
               </div>
             ) : (
               <div className="space-y-3">
-                {pendingPayouts.map((item) => (
-                  <div key={item.id} className="p-3 bg-zinc-900 border border-zinc-800 rounded space-y-2 text-xs">
-                    <div className="flex justify-between">
+                {pendingPayouts.map((payout) => (
+                  <div key={payout.id} className="p-3 bg-zinc-900 border border-zinc-800 rounded space-y-2 text-xs">
+                    <div className="flex justify-between items-center">
                       <span className="text-gray-400">Tutar:</span>
-                      <span className="text-emerald-400 font-bold">{item.creator_commission || 0} USDT</span>
+                      <span className="font-bold text-emerald-400">{payout.creator_commission || 0} USDT</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Cüzdan:</span>
-                      <span className="font-mono text-[10px] text-gray-300 truncate max-w-[120px]">{item.usdt_address || 'Tanımsız'}</span>
-                    </div>
+                    {payout.usdt_address && (
+                      <p className="text-[10px] text-gray-500 truncate">Adres: {payout.usdt_address}</p>
+                    )}
                     <button
-                      onClick={() => handleApprovePayout(item.id)}
-                      className="w-full bg-emerald-500 hover:bg-emerald-600 text-black font-bold py-1 rounded transition-colors cursor-pointer"
+                      onClick={() => handleApprovePayout(payout.id)}
+                      className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-1.5 rounded transition text-xs"
                     >
-                      Ödendi İşaretle
+                      Ödendi Olarak İşaretle
                     </button>
                   </div>
                 ))}
